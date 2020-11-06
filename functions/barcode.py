@@ -7,7 +7,7 @@ def getbarcode(upc:str):
 
         res = requests.get(url, allow_redirects=True)
         #print(res.content)
-        imgpath = os.getcwd() + "\\images\\.%s.temp.png" % upc
+        imgpath = os.getcwd() + "\\cache\\.%s.temp.png" % upc
         file = open(imgpath, 'wb')
         file.write(res.content)
         file.close()

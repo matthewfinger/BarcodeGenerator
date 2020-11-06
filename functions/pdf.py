@@ -9,7 +9,7 @@ def createLetterPdf(marginTop=1, marginLeft=0.75, marginRight=0.75):
 
     return pdf
 
-def createBarcodePDF(imageList, outputfile="testbarcode.pdf"):
+def createBarcodePDF(imageList, outputfile="\\cache\\.barcodes.temp.pdf"):
     success = True
     try:
         pdf = createLetterPdf(0,0,0)
