@@ -1,6 +1,7 @@
 import tkinter as tk
 from . import layouts
 from . import applogic
+from .incrementpanel import IncrementPanel
 
 class UpcRow(layouts.Layout):
     def __init__(self, master, upcvar, quantityvar):
@@ -42,9 +43,14 @@ class FrameBox(layouts.Layout):
         super().__init__(master)
         self.getupcs = getupcs
         self.changeupcs = changeupcs
+        self.incrementpanel = IncrementPanel(self.widget, self.incrementRows, self.decrementRows)
+        self.incrementpanel.widget.pack(side=tk.LEFT)
+
         self.toprow = TopRow(self.widget)
         self.toprow.widget.pack()
         self.upcindex = 0
+
+
 
         #self.upcentries will be a list of tuples
         self.upcentries = []
@@ -56,14 +62,20 @@ class FrameBox(layouts.Layout):
                 "upcvar": upcvar,
                 "upcrow": UpcRow(self.widget, upcvar, quantityvar),
                 "upcindex": None,
+                "visible": False,
             }
-            self.upcentries.append(newentry)
-            newentry['upcrow'].widget.pack()
             self.refreshFunctions.append(lambda: applogic.validateQuantity(quantityvar))
             self.refreshFunctions.append(lambda: applogic.validateUPC(upcvar))
+            self.upcentries.append(newentry)
+
         self.refreshFunctions.append(self.fillRows)
 
+    @property
+    def visible_rows(self):
+        return max((len(self.getupcs()) - 1) - self.upcindex, 0)
 
+
+    #this function syncs the rows with with the current values for the upc list
     def fillRows(self):
         upcs = self.getupcs()
         upcindex = self.upcindex
@@ -76,6 +88,10 @@ class FrameBox(layouts.Layout):
                 upc = upckeys[i]
                 changeupc = False
                 newupcinfo = {}
+                #if row is not visible, make it visible
+                if not self.upcentries[index]['visible']:
+                    self.upcentries[index]['upcrow'].widget.pack()
+                    self.upcentries[index]['visible'] = True
 
                 if self.upcentries[index]["upcindex"] == index + upcindex and not upcs[upc][2]:
 
@@ -92,10 +108,32 @@ class FrameBox(layouts.Layout):
                     if changeupc:
                         self.changeupcs(upc, newupcinfo)
 
+
                 else:
                     self.upcentries[index]["upcindex"] = index + upcindex
                     self.upcentries[index]['upcvar'].set(upc)
                     self.upcentries[index]['quantityvar'].set(upcs[upc][0])
                     self.changeupcs(upc, {'lastupdated': False})
 
+                    #if row is visible, make it not so
+            elif self.upcentries[index]['visible']:
+                self.upcentries[index]['upcrow'].widget.pack_forget()
+                self.upcentries[index]['visible'] = False
+
+
             index += 1
+
+    # Function that increases the starting index for the rows
+    def incrementRows(self, interval=1):
+        numrows = len(self.getupcs().values())
+        if (self.upcindex + interval) + 1 < numrows:
+            self.upcindex += interval
+        elif self.upcindex + 1 < numrows:
+            self.upcindex = numrows - 1
+
+    # Function that decreases the starting index for the rows
+    def decrementRows(self, interval=1):
+        if self.upcindex >= interval:
+            self.upcindex -= interval
+        elif self.upcindex > 0:
+            self.upcindex = 0
