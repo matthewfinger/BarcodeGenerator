@@ -9,7 +9,7 @@ def createLetterPdf(marginTop=1, marginLeft=0.75, marginRight=0.75):
 
     return pdf
 
-def createBarcodePDF(imageList, outputfile=os.getcwd() + "\\cache\\.barcodes.temp.pdf"):
+def createBarcodePDF(imageList, outputfile='%s\\cache\\.barcodes.temp.pdf' % os.getcwd()):
     success = True
     try:
         pdf = createLetterPdf(0,0,0)
@@ -65,7 +65,7 @@ def createBarcodePDF(imageList, outputfile=os.getcwd() + "\\cache\\.barcodes.tem
     #the following will open the pdf file in the system's default pdf viewer on WINDOWS
     if success:
         try:
-            os.system(outputfile)
+            os.system('start /B %s' % outputfile)
         except Exception as inst:
             print('Something went wrong!', inst)
 
