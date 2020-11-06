@@ -58,7 +58,6 @@ class MakeUpcsLayout(layouts.Layout):
 
         #if the upc has already been generated, only increment the quantity
         if upc in self.upcs.keys():
-            print("Adding %s to the quantity of upc %s" % (quantity, upc))
             self.upcs[upc][0] += int(quantity)
             self.upcs[upc][2] = True
             return

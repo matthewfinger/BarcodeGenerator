@@ -1,5 +1,5 @@
 from fpdf import FPDF
-import time, math
+import time, math, os
 
 def createLetterPdf(marginTop=1, marginLeft=0.75, marginRight=0.75):
     pdf = FPDF(unit="in",format="letter")
@@ -9,7 +9,7 @@ def createLetterPdf(marginTop=1, marginLeft=0.75, marginRight=0.75):
 
     return pdf
 
-def createBarcodePDF(imageList, outputfile="\\cache\\.barcodes.temp.pdf"):
+def createBarcodePDF(imageList, outputfile=os.getcwd() + "\\cache\\.barcodes.temp.pdf"):
     success = True
     try:
         pdf = createLetterPdf(0,0,0)
@@ -49,9 +49,7 @@ def createBarcodePDF(imageList, outputfile="\\cache\\.barcodes.temp.pdf"):
                 xoffset = marginLeft
                 for img in row:
                     pdf.rect(w=lblWidth + lblHPadding*2, h=lblHeight+lblVPadding*2, x=xoffset, y=yoffset)
-                    print(img)
                     pdf.image(img, x=xoffset + lblHPadding, y=yoffset + lblVPadding, w=lblWidth, h=lblHeight)
-                    print(1)
                     xoffset += lblWidth + (lblHPadding * 2) + lblHSpacing
                 yoffset += lblHeight + (lblVPadding * 2) + lblVSpacing
                 rownum += 1
@@ -63,5 +61,12 @@ def createBarcodePDF(imageList, outputfile="\\cache\\.barcodes.temp.pdf"):
         pdf.output(outputfile)
     except Exception as inst:
         print('something went wrong!', inst)
+
+    #the following will open the pdf file in the system's default pdf viewer on WINDOWS
+    if success:
+        try:
+            os.system(outputfile)
+        except Exception as inst:
+            print('Something went wrong!', inst)
 
     return {"success": success, "file":outputfile}

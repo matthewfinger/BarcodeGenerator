@@ -93,7 +93,6 @@ class FrameBox(layouts.Layout):
                         self.changeupcs(upc, newupcinfo)
 
                 else:
-                    print("updating upcrow")
                     self.upcentries[index]["upcindex"] = index + upcindex
                     self.upcentries[index]['upcvar'].set(upc)
                     self.upcentries[index]['quantityvar'].set(upcs[upc][0])
