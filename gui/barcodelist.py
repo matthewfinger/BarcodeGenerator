@@ -7,15 +7,15 @@ class UpcRow(layouts.Layout):
         super().__init__(master)
         self.widget['height'] = 50
         #upc stuff
-        self.upcframe = tk.Frame(self.widget, width=275, relief=tk.GROOVE)
+        self.upcframe = tk.Frame(self.widget, width=275, relief=tk.GROOVE, padx=1, pady=1)
         self.upcframe.pack(side=tk.LEFT)
-        self.upcentry = tk.Entry(self.upcframe, textvariable=upcvar)
+        self.upcentry = tk.Entry(self.upcframe, textvariable=upcvar, font=("px", 28, "normal"), width=12)
         self.upcentry.pack()
 
         #quantity stuff
         self.quantityframe = tk.Frame(self.widget, width=275, relief=tk.GROOVE)
         self.quantityframe.pack(side=tk.RIGHT)
-        self.quantityentry = tk.Entry(self.quantityframe, textvariable=quantityvar)
+        self.quantityentry = tk.Entry(self.quantityframe, textvariable=quantityvar, font=("px", 28, "normal"), width=12)
         self.quantityentry.pack()
 
 
@@ -26,13 +26,13 @@ class TopRow(layouts.Layout):
         #upc stuff
         self.upcframe = tk.Frame(self.widget, width=275, relief=tk.GROOVE)
         self.upcframe.pack(side=tk.LEFT)
-        self.upclabel = tk.Label(self.upcframe, text="UPC", justify=tk.LEFT)
+        self.upclabel = tk.Label(self.upcframe, text="UPC", justify=tk.CENTER, font=("px", 20, "normal"), width=12)
         self.upclabel.pack()
 
         #quantity stuff
         self.quantityframe = tk.Frame(self.widget, width=275, relief=tk.GROOVE)
         self.quantityframe.pack(side=tk.RIGHT)
-        self.quantitylabel = tk.Label(self.quantityframe, text="quantity", anchor="w")
+        self.quantitylabel = tk.Label(self.quantityframe, text="quantity", justify=tk.CENTER, font=("px", 20, "normal"), width=12)
         self.quantitylabel.pack()
 
 class FrameBox(layouts.Layout):
