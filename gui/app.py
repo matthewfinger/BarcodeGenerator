@@ -33,7 +33,7 @@ class MakeUpcsLayout(layouts.Layout):
         upclist = []
         for pair in self.upcs.values():
             upclist += [pair[1]] * pair[0]
-        self.makepdffun(upclist)#, (self.startingrow, self.startingcol))
+        self.makepdffun(upclist, startingpos=(self.startingrow, self.startingcol))
 
     def setstartingpos(self, row=None, col=None):
         if type(row) == int:

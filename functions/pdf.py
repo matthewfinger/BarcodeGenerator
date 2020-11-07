@@ -9,7 +9,7 @@ def createLetterPdf(marginTop=1, marginLeft=0.75, marginRight=0.75):
 
     return pdf
 
-def createBarcodePDF(imageList, outputfile='%s\\cache\\.barcodes.temp.pdf' % os.getcwd()):
+def createBarcodePDF(imageList, outputfile='%s\\cache\\.barcodes.temp.pdf' % os.getcwd(), startingpos=(0,0)):
     success = True
     try:
         pdf = createLetterPdf(0,0,0)
@@ -25,6 +25,14 @@ def createBarcodePDF(imageList, outputfile='%s\\cache\\.barcodes.temp.pdf' % os.
         lblHeight = 0.5 - lblVPadding*2
         columnsperrow = 4
         rowsperpage = 20
+
+        #lets find out how many blank spaces we'll have
+        blankspaces = startingpos[0] * columnsperrow
+        blankspaces += startingpos[1]
+        blanklist = [""] * blankspaces
+
+        #now lets insert the blank spaces to the beginning of the list
+        imageList = blanklist + imageList
 
         #assemble a list of lists to represent pages->rows->labels
         pages = []
@@ -48,8 +56,10 @@ def createBarcodePDF(imageList, outputfile='%s\\cache\\.barcodes.temp.pdf' % os.
                 pdf.text(x=0,y=yoffset + lblVPadding +0.25,txt= str(rownum))
                 xoffset = marginLeft
                 for img in row:
-                    pdf.rect(w=lblWidth + lblHPadding*2, h=lblHeight+lblVPadding*2, x=xoffset, y=yoffset)
-                    pdf.image(img, x=xoffset + lblHPadding, y=yoffset + lblVPadding, w=lblWidth, h=lblHeight)
+                    #only insert image and border if image file exists
+                    if os.path.exists(img):
+                        pdf.rect(w=lblWidth + lblHPadding*2, h=lblHeight+lblVPadding*2, x=xoffset, y=yoffset)
+                        pdf.image(img, x=xoffset + lblHPadding, y=yoffset + lblVPadding, w=lblWidth, h=lblHeight)
                     xoffset += lblWidth + (lblHPadding * 2) + lblHSpacing
                 yoffset += lblHeight + (lblVPadding * 2) + lblVSpacing
                 rownum += 1
