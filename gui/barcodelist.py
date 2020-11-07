@@ -39,15 +39,16 @@ class TopRow(layouts.Layout):
 class FrameBox(layouts.Layout):
     #getupcs is a function that retruns a list of all upcs in the parent layout
     #changeupc is a function that changes a upc ex. changeupc("<upcname>", {<upcdetails>})
-    def __init__(self, master, getupcs, changeupcs):
-        super().__init__(master)
+    def __init__(self, master, getupcs, changeupcs, side=None):
+        super().__init__(master, side=side)
         self.getupcs = getupcs
         self.changeupcs = changeupcs
         self.incrementpanel = IncrementPanel(self.widget, self.incrementRows, self.decrementRows)
-        self.incrementpanel.widget.pack(side=tk.LEFT)
+        self.incrementpanel.widget.config(relief="raised", borderwidth=2)
+        self.incrementpanel.widget.pack(side=tk.LEFT, fill="y", expand=True, padx=10, pady=10)
 
         self.toprow = TopRow(self.widget)
-        self.toprow.widget.pack()
+        self.toprow.widget.pack(side=tk.TOP, fill="x")
         self.upcindex = 0
 
 
@@ -69,10 +70,6 @@ class FrameBox(layouts.Layout):
             self.upcentries.append(newentry)
 
         self.refreshFunctions.append(self.fillRows)
-
-    @property
-    def visible_rows(self):
-        return max((len(self.getupcs()) - 1) - self.upcindex, 0)
 
 
     #this function syncs the rows with with the current values for the upc list

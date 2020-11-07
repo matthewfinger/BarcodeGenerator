@@ -5,13 +5,14 @@ from . import applogic
 class ItemLookupBottomPanel(layouts.Layout):
     #upcAdd function should take two params: upc and quantity
     #setstartingpos function should take a row and a col param
-    def __init__(self, master, upcAdd, setstartingpos):
-        super().__init__(master)
+    def __init__(self, master, upcAdd, setstartingpos, side=None):
+        super().__init__(master, side=side)
         #upc entry stuff
         self.upcLabel = tk.Label(self.widget, text="Enter a 11 digit upc:")
         self.upcLabel.pack()
         self.upcvar = tk.StringVar()
         self.upcEntry = tk.Entry(self.widget, textvariable=self.upcvar)
+        self.upcEntry.bind("<Return>", lambda event: upcAdd(self.upcvar, self.quantityvar))
         self.upcEntry.pack()
 
         #quantity entry stuff

@@ -3,14 +3,16 @@ from PIL import Image, ImageTk
 
 def getbarcode(upc:str):
     if (len(upc) == 11 and upc.isdecimal()):
-        url = "https://barcode.tec-it.com/barcode.ashx?data=%s&code=UPCA&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%%23000000&bgcolor=%%23ffffff&codepage=&qunit=Mm&quiet=0&dmsize=Default" % upc
-
-        res = requests.get(url, allow_redirects=True)
-        #print(res.content)
         imgpath = os.getcwd() + "\\cache\\.%s.temp.png" % upc
-        file = open(imgpath, 'wb')
-        file.write(res.content)
-        file.close()
+        #we only want to use the url if we don't have the image cached already!
+        if not os.path.exists(imgpath):
+            url = "https://barcode.tec-it.com/barcode.ashx?data=%s&code=UPCA&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%%23000000&bgcolor=%%23ffffff&codepage=&qunit=Mm&quiet=0&dmsize=Default" % upc
+
+            res = requests.get(url, allow_redirects=True)
+            #print(res.content)
+            file = open(imgpath, 'wb')
+            file.write(res.content)
+            file.close()
         return imgpath
 
 def generateupc():

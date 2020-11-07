@@ -15,16 +15,16 @@ class MakeUpcsLayout(layouts.Layout):
         masterheight = self.master.winfo_height()
         masterwidth = self.master.winfo_width()
         self.listFrame = tk.Frame(self.widget, height=600, width=600)
-        self.listFrame.pack(side=tk.LEFT)
-        self.addLayout('barcodelist', barcodelist.FrameBox(self.listFrame, self.getupcs, self.changeupc))
+        self.listFrame.pack(side=tk.LEFT, expand=True, fill='both')
+        self.addLayout('barcodelist', barcodelist.FrameBox(self.listFrame, self.getupcs, self.changeupc, side=tk.TOP))
         self.loadLayout('barcodelist')
 
 
-        self.bottomFrame = tk.Frame(self.widget, bd=1, relief=tk.GROOVE, height=600)
-        self.bottomFrame.pack(expand=False)
-        self.addLayout("bottomPanel", make_barcode_list.ItemLookupBottomPanel(self.bottomFrame, self.upcAdd, self.setstartingpos))
-        self.loadLayout("bottomPanel")
-        self.generatePdfButton = tk.Button(self.bottomFrame, text="Make Label Pdf", command=self.makePDF)
+        self.rightFrame = tk.Frame(self.widget, bd=1, relief=tk.GROOVE, height=600)
+        self.rightFrame.pack(side=tk.RIGHT)
+        self.addLayout("rightPanel", make_barcode_list.ItemLookupBottomPanel(self.rightFrame, self.upcAdd, self.setstartingpos))
+        self.loadLayout("rightPanel")
+        self.generatePdfButton = tk.Button(self.rightFrame, text="Make Label Pdf", command=self.makePDF)
         self.generatePdfButton.pack()
 
 
