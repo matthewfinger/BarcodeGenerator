@@ -24,7 +24,7 @@ class MakeUpcsLayout(layouts.Layout):
         self.rightFrame.pack(side=tk.RIGHT)
         self.addLayout("rightPanel", make_barcode_list.ItemLookupBottomPanel(self.rightFrame, self.upcAdd, self.setstartingpos))
         self.loadLayout("rightPanel")
-        self.generatePdfButton = tk.Button(self.rightFrame, text="Make Label Pdf", command=self.makePDF)
+        self.generatePdfButton = tk.Button(self.rightFrame, text="Make Label PDF", command=self.makePDF)
         self.generatePdfButton.pack()
 
 
