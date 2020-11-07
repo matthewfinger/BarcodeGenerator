@@ -7,7 +7,7 @@ class MakeUpcsLayout(layouts.Layout):
     #makeupcurl should take 1 parameter: upc, and makepdffun should take a list of tuples, such that (url, quantity), and a start position such that (row, col)
     def __init__(self, master, makeupcurl, makepdffun):
         super().__init__(master)
-        self.upcs = {}
+        self.upcs = []
         self.startingrow = 0
         self.startingcol = 0
         self.makeupcurl = makeupcurl
@@ -22,7 +22,7 @@ class MakeUpcsLayout(layouts.Layout):
 
         self.rightFrame = tk.Frame(self.widget, bd=1, relief=tk.GROOVE, height=600)
         self.rightFrame.pack(side=tk.RIGHT)
-        self.addLayout("rightPanel", make_barcode_list.ItemLookupBottomPanel(self.rightFrame, self.upcAdd, self.setstartingpos))
+        self.addLayout("rightPanel", make_barcode_list.ItemLookupBottomPanel(self.rightFrame, self.changeupc, self.setstartingpos))
         self.loadLayout("rightPanel")
         self.generatePdfButton = tk.Button(self.rightFrame, text="Make Label PDF", command=self.makePDF)
         self.generatePdfButton.pack()
@@ -31,8 +31,8 @@ class MakeUpcsLayout(layouts.Layout):
     #function that actually generates a pdf to be printed
     def makePDF(self):
         upclist = []
-        for pair in self.upcs.values():
-            upclist += [pair[1]] * pair[0]
+        for row in self.upcs:
+            upclist += [row[2]] * row[1]
         self.makepdffun(upclist, startingpos=(self.startingrow, self.startingcol))
 
     def setstartingpos(self, row=None, col=None):
@@ -42,50 +42,64 @@ class MakeUpcsLayout(layouts.Layout):
         if type(col) == int:
             self.startingcol = col
 
-    #function that either generates a new upc image and gets the url, or increments the value of the upc
-    def upcAdd(self, upcvar, quantityvar):
-
-        upc = upcvar.get()
-        quantity = quantityvar.get()
-
-        while len(upc) < 11:
-            upc += '0'
-        upcvar.set(upc)
-
-        if quantity == "0" or quantity == '':
-            quantity = "1"
-        quantityvar.set(quantity)
-
-        #if the upc has already been generated, only increment the quantity
-        if upc in self.upcs.keys():
-            self.upcs[upc][0] += int(quantity)
-            self.upcs[upc][2] = True
-            return
-
-        upcurl = self.makeupcurl(upc)
-        self.upcs[upc] = [int(quantity), upcurl, True,]
-
     def getupcs(self):
         return self.upcs
 
     def changeupc(self, upcname:str, newupcvars:dict):
-        if not upcname in self.upcs.keys():
-            print("Upc %s does not exist!" % upcname)
+        upcindex = None
+        updatedrow = []
+        i = 0
+        while i < len(self.upcs) and not upcindex:
+            #if the upc is in the list
+            if upcname == self.upcs[i][0]:
+                upcindex = i
+                updatedrow = list(self.upcs[upcindex])
+            i += 1
+
+        #if the upc is not in the list
+        if not upcindex:
+            print('hi')
+            upcindex = len(self.upcs)
+            quantity = 1
+            newkeys = newupcvars.keys()
+            if 'quantity' in newkeys:
+                if type(newupcvars['quantity']) == str and newupcvars['quantity'].isnumeric():
+                    quantity = int(newupcvars['quantity'])
+            lastupdated = False
+            if 'lastupdated' in newkeys:
+                bool(newupcvars['lastupdated'])
+            self.upcs.append([upcname, quantity, "", lastupdated])
             return
-        #if we're changing the upc, we'll have to change the key and record itself
-        if "upc" in newupcvars.keys():
-            newupc = newupcvars["upc"]
-            self.upcs[newupc] = [self.upcs[upcname][0], self.upcs[upcname][1], False]
-            del self.upcs[upcname]
-            upcname = newupc
+            newupcvars['upc'] = upcname
+            newupcvars['lastupdated'] = False
 
-        #chnage other params where applicable
-        if "quantity" in newupcvars.keys():
-            if type(newupcvars['quantity']) == int and newupcvars['quantity'] > 0:
-                self.upcs[upcname][0] = newupcvars['quantity']
+        currentrow = self.upcs[upcindex]
+        changedfields = newupcvars.keys()
 
-        self.upcs[upcname][2] = False
+        #if we're getting a new upc
+        if not currentrow[2]:
+            newupc = upcname
+            if 'upc' in changedfields:
+                newupc = newupcvars['upc']
+            newupcvars['url'] = self.makeupcurl(newupc)
+            changedfields = newupcvars.keys()
 
+        i = 0
+        for property in ['upc', 'quantity', 'url', 'lastupdated']:
+            if property in changedfields and self.upcs[upcindex][i] != newupcvars[property]:
+
+                print(self.upcs[upcindex][i])
+                self.upcs[upcindex][i] = newupcvars[property]
+            i += 1
+        return
+        #make sure quantity is a var
+        if type(updatedrow[1]) != int:
+            if type(updatedrow[1]) == str and updatedrow[1].isnumeric():
+                updatedrow[1] = int(updatedrow[1])
+            else:
+                updatedrow[1] = 1
+        print(upcindex)
+        self.upcs[upcindex] = updatedrow
 
 
 

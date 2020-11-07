@@ -39,10 +39,10 @@ class TopRow(layouts.Layout):
 class FrameBox(layouts.Layout):
     #getupcs is a function that retruns a list of all upcs in the parent layout
     #changeupc is a function that changes a upc ex. changeupc("<upcname>", {<upcdetails>})
-    def __init__(self, master, getupcs, changeupcs, side=None):
+    def __init__(self, master, getupcs, changeupc, side=None):
         super().__init__(master, side=side)
         self.getupcs = getupcs
-        self.changeupcs = changeupcs
+        self.changeupc = changeupc
         self.incrementpanel = IncrementPanel(self.widget, self.incrementRows, self.decrementRows)
         self.incrementpanel.widget.config(relief="raised", borderwidth=2)
         self.incrementpanel.widget.pack(side=tk.LEFT, fill="y", expand=True, padx=10, pady=10)
@@ -74,51 +74,62 @@ class FrameBox(layouts.Layout):
 
     #this function syncs the rows with with the current values for the upc list
     def fillRows(self):
-        upcs = self.getupcs()
         upcindex = self.upcindex
-        upckeys = list(self.getupcs().keys())[upcindex : upcindex + 11]
-        index = 0
+        upcs = self.getupcs()[upcindex: upcindex + 11]
         for i in range(11):
-            applogic.validateQuantity(self.upcentries[index]['quantityvar'])
-            applogic.validateUPC(self.upcentries[index]['upcvar'])
-            if i < len(upckeys):
-                upc = upckeys[i]
+            applogic.validateQuantity(self.upcentries[i]['quantityvar'])
+            applogic.validateUPC(self.upcentries[i]['upcvar'])
+            if i < len(upcs):
+                upc = upcs[i][0]
                 changeupc = False
                 newupcinfo = {}
                 #if row is not visible, make it visible
-                if not self.upcentries[index]['visible']:
-                    self.upcentries[index]['upcrow'].widget.pack()
-                    self.upcentries[index]['visible'] = True
+                if not self.upcentries[i]['visible']:
+                    self.upcentries[i]['upcrow'].widget.pack()
+                    self.upcentries[i]['visible'] = True
 
-                if self.upcentries[index]["upcindex"] == index + upcindex and not upcs[upc][2]:
-
-                    #check whether we have to change upc
-                    if upc != self.upcentries[index]['upcvar'].get():
-                        changeupc = True
-                        newupcinfo['upc'] = self.upcentries[index]['upcvar'].get()
-
-                    #check wheter we have to change quantity
-                    if upcs[upc][0] != int(self.upcentries[index]['quantityvar'].get()):
-                        changeupc = True
-                        newupcinfo['quantity'] = int(self.upcentries[index]['quantityvar'].get())
-
-                    if changeupc:
-                        self.changeupcs(upc, newupcinfo)
-
-
+                if self.upcentries[i]["upcindex"] == i + upcindex and not upcs[i][3]:
+                    self.pushRow(i)
                 else:
-                    self.upcentries[index]["upcindex"] = index + upcindex
-                    self.upcentries[index]['upcvar'].set(upc)
-                    self.upcentries[index]['quantityvar'].set(upcs[upc][0])
-                    self.changeupcs(upc, {'lastupdated': False})
+                    self.pullRow(i)
 
                     #if row is visible, make it not so
-            elif self.upcentries[index]['visible']:
-                self.upcentries[index]['upcrow'].widget.pack_forget()
-                self.upcentries[index]['visible'] = False
+            elif self.upcentries[i]['visible']:
+                self.upcentries[i]['upcrow'].widget.pack_forget()
+                self.upcentries[i]['visible'] = False
 
 
-            index += 1
+
+    def pullRow(self, index):
+        #get relevant data
+        masterindex = self.upcindex + index
+        upcentry = self.upcentries[index]
+        masterupc = self.getupcs()[masterindex]
+        #print(masterupc)
+        #change relevant data
+        upcentry['upcvar'].set(masterupc[0])
+        upcentry['quantityvar'].set("%d" % masterupc[1])
+
+        newupcvars = {}
+        newupcvars['lastupdated'] = True
+        self.changeupc(masterupc[0], newupcvars)
+
+    def pushRow(self, index):
+        #get relevant data
+        masterindex = self.upcindex + index
+        upcentry = self.upcentries[index]
+        masterupc = self.getupcs()[masterindex]
+
+        #change relevant data
+        newupcvars = {}
+        if upcentry['upcvar'].get() != masterupc[0]:
+            newupcvars['upc'] = upcentry['upcvar'].get()
+
+        if upcentry['quantityvar'].get() != masterupc[1]:
+            newupcvars['quantity'] = upcentry['quantityvar'].get()
+
+        if newupcvars != {}:
+            self.changeupc(masterupc[0], newupcvars)
 
     # Function that increases the starting index for the rows
     def incrementRows(self, interval=1):

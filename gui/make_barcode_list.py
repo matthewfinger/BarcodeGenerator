@@ -5,15 +5,16 @@ from . import applogic
 class ItemLookupBottomPanel(layouts.Layout):
     #upcAdd function should take two params: upc and quantity
     #setstartingpos function should take a row and a col param
-    def __init__(self, master, upcAdd, setstartingpos, side=None):
+    def __init__(self, master, changeupc, setstartingpos, side=None):
         super().__init__(master, side=side)
         self.setstartingpos = setstartingpos
+        self.changeupc = changeupc
         #upc entry stuff
         self.upcLabel = tk.Label(self.widget, text="Enter a 11 digit upc:")
         self.upcLabel.pack()
         self.upcvar = tk.StringVar()
         self.upcEntry = tk.Entry(self.widget, textvariable=self.upcvar)
-        self.upcEntry.bind("<Return>", lambda event: upcAdd(self.upcvar, self.quantityvar))
+        self.upcEntry.bind("<Return>", self.addupc)
         self.upcEntry.pack()
 
         #quantity entry stuff
@@ -24,7 +25,7 @@ class ItemLookupBottomPanel(layouts.Layout):
         self.quantityEntry.pack()
 
         #add button stuff
-        self.lookupbutton = tk.Button(self.widget, text="Add", command=lambda: upcAdd(self.upcvar, self.quantityvar))
+        self.lookupbutton = tk.Button(self.widget, text="Add", command=self.addupc)
         self.lookupbutton.pack()
 
         #starting pos stuff
@@ -46,6 +47,14 @@ class ItemLookupBottomPanel(layouts.Layout):
 
         self.refreshFunctions.append(lambda: setstartingpos(**self.getstartingpos()))
 
+
+    def addupc(self, event):
+        self.validateUPC()
+        self.validateQuantity()
+        self.changeupc(self.upcvar.get(), {
+            'quantity': self.quantityvar.get(),
+            'lastupdated': True
+        })
 
     def validateUPC(self):
         applogic.validateUPC(self.upcvar)
@@ -71,55 +80,3 @@ class ItemLookupBottomPanel(layouts.Layout):
             'row' : int(row) - 1,
             'col' : int(col) - 1,
             }
-
-
-class MakeBarcodeList(layouts.Layout):
-    def __init__(self, master, makeupcfun, makepdffun, pdfurl:str=""):
-        super().__init__(master)
-        self.bottomPanel = ItemLookupBottomPanel(self.widget, self.upcAdd)
-        self.bottomPanel.widget.pack()
-        for function in self.bottomPanel.refreshFunctions:
-            self.refreshFunctions.append(function)
-
-        self.pdfurl = pdfurl
-        self.makeupcfun = makeupcfun
-        self.makepdffun = makepdffun
-
-    def upcAdd(self):
-        self.bottomPanel.validateUPC()
-        self.bottomPanel.validateQuantity()
-
-        upc = self.bottomPanel.upcvar.get()
-        quantity = self.bottomPanel.quantityvar.get()
-
-        while len(upc) < 11:
-            upc += '0'
-        self.bottomPanel.upcvar.set(upc)
-
-        if quantity == "0" or quantity == '':
-            quantity = "1"
-        self.bottomPanel.quantityvar.set(quantity)
-
-        self.upcs.append({"upc": upc, "quantity": quantity})
-
-    def makeBarcodes(self):
-        for upc in self.upcs:
-            upc["imageURL"] = self.makeupcfun(upc)
-
-    def getPDFImageList(self):
-        res = []
-        for upc in self.upcs:
-            keys = upc.keys()
-            if "imageURL" in keys and "quantity" in keys:
-                res += ([upc['imageURL']] * upc['quantity'])
-        return res
-
-    def makePDF(self):
-        images = self.getPDFImageList()
-        pdfresult = None
-        if self.pdfurl:
-            pdfresult = self.makepdffun(images, self.pdfurl)
-        else:
-            pdfresult = self.makepdffun(images)
-
-        self.pdfurl = pdfresult["file"]
