@@ -3,6 +3,10 @@ from . import make_barcode_list
 from . import layouts
 from . import barcodelist
 from . import applogic
+import os
+
+CWD = os.getcwd()
+ICONPHOTO_PATH = "%s\\gui\\images\\iconphoto.png" % CWD
 
 class MakeUpcsLayout(layouts.Layout):
     #makeupcurl should take 1 parameter: upc, and makepdffun should take a list of tuples, such that (url, quantity), and a start position such that (row, col)
@@ -96,6 +100,11 @@ class MakeUpcsLayout(layouts.Layout):
 class App(layouts.Layout):
     def __init__(self, makeupcurl, makepdffun):
         self.rootframe = tk.Tk()
+        self.rootframe.title("Barcode Generator")
+        print(ICONPHOTO_PATH)
+        if os.path.exists(ICONPHOTO_PATH):
+            self.iconphoto = tk.PhotoImage(file=ICONPHOTO_PATH)
+            self.rootframe.iconphoto(True, self.iconphoto)
         self.rootframe.geometry("800x600")
         self.layouts = {}
         self.refreshFunctions = [self.refreshChildFunctions]
