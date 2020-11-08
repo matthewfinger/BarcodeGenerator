@@ -59,8 +59,6 @@ class FrameBox(layouts.Layout):
             upcvar = tk.StringVar()
             quantityvar = tk.StringVar()
             newentry = {
-                "quantityvar": quantityvar,
-                "upcvar": upcvar,
                 "upcrow": UpcRow(self.widget, upcvar, quantityvar),
                 "upcindex": None,
                 "visible": False,
@@ -75,65 +73,44 @@ class FrameBox(layouts.Layout):
     #this function syncs the rows with with the current values for the upc list
     def fillRows(self):
         upcindex = self.upcindex
-        upcs = self.getupcs()[upcindex: upcindex + 11]
+        upcs = self.getupcs()[upcindex : upcindex + 11]
         for i in range(11):
-            applogic.validateQuantity(self.upcentries[i]['quantityvar'])
-            applogic.validateUPC(self.upcentries[i]['upcvar'])
             if i < len(upcs):
-                upc = upcs[i][0]
-                changeupc = False
-                newupcinfo = {}
                 #if row is not visible, make it visible
                 if not self.upcentries[i]['visible']:
                     self.upcentries[i]['upcrow'].widget.pack()
                     self.upcentries[i]['visible'] = True
-
-                if self.upcentries[i]["upcindex"] == i + upcindex and not upcs[i][3]:
-                    self.pushRow(i)
-                else:
-                    self.pullRow(i)
 
                     #if row is visible, make it not so
             elif self.upcentries[i]['visible']:
                 self.upcentries[i]['upcrow'].widget.pack_forget()
                 self.upcentries[i]['visible'] = False
 
-
+    def pullRows(self):
+        for i in range(11):
+            self.pullRow(i)
 
     def pullRow(self, index):
         #get relevant data
         masterindex = self.upcindex + index
+        if masterindex >= len(self.getupcs()):
+            return
         upcentry = self.upcentries[index]
         masterupc = self.getupcs()[masterindex]
-        #print(masterupc)
+        
         #change relevant data
-        upcentry['upcvar'].set(masterupc[0])
-        upcentry['quantityvar'].set("%d" % masterupc[1])
-
+        upcentry['upcindex'] = masterindex
+        upcentry['upcrow'].upcentry.config(textvariable=masterupc[0])
+        upcentry['upcrow'].quantityentry.config(textvariable=masterupc[1])
+        self.upcentries[index] = upcentry
         newupcvars = {}
-        newupcvars['lastupdated'] = True
-        self.changeupc(masterupc[0], newupcvars)
+        newupcvars['lastmodified'] = True
+        #self.changeupc(masterupc[0].get(), newupcvars, caller="changeupc")
 
-    def pushRow(self, index):
-        #get relevant data
-        masterindex = self.upcindex + index
-        upcentry = self.upcentries[index]
-        masterupc = self.getupcs()[masterindex]
-
-        #change relevant data
-        newupcvars = {}
-        if upcentry['upcvar'].get() != masterupc[0]:
-            newupcvars['upc'] = upcentry['upcvar'].get()
-
-        if upcentry['quantityvar'].get() != masterupc[1]:
-            newupcvars['quantity'] = upcentry['quantityvar'].get()
-
-        if newupcvars != {}:
-            self.changeupc(masterupc[0], newupcvars)
 
     # Function that increases the starting index for the rows
     def incrementRows(self, interval=1):
-        numrows = len(self.getupcs().values())
+        numrows = len(self.getupcs())
         if (self.upcindex + interval) + 1 < numrows:
             self.upcindex += interval
         elif self.upcindex + 1 < numrows:

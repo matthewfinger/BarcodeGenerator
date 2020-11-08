@@ -23,6 +23,7 @@ class ItemLookupBottomPanel(layouts.Layout):
         self.quantityvar = tk.StringVar()
         self.quantityEntry = tk.Entry(self.widget, textvariable=self.quantityvar)
         self.quantityEntry.pack()
+        self.quantityEntry.bind("<Return>", self.addupc)
 
         #add button stuff
         self.lookupbutton = tk.Button(self.widget, text="Add", command=self.addupc)
@@ -48,13 +49,12 @@ class ItemLookupBottomPanel(layouts.Layout):
         self.refreshFunctions.append(lambda: setstartingpos(**self.getstartingpos()))
 
 
-    def addupc(self, event):
+    def addupc(self, event=None):
         self.validateUPC()
         self.validateQuantity()
         self.changeupc(self.upcvar.get(), {
             'quantity': self.quantityvar.get(),
-            'lastupdated': True
-        })
+        }, caller="addupc")
 
     def validateUPC(self):
         applogic.validateUPC(self.upcvar)

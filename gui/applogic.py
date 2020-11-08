@@ -37,8 +37,9 @@ def applyRange(var, _max=None, _min=0):
 
 
 def validateUPC(upcvar):
-    makeNumeric(upcvar)
-    makeLength(upcvar, 11)
+    curinput = makeLength(makeNumeric(upcvar), 11).get()
+    zeros = '0' * (11 - len(curinput))
+    upcvar.set(curinput + zeros)
     return upcvar
 
 def validateQuantity(quantityvar, quantityLength:int = 3):

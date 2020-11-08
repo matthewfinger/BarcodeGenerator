@@ -2,6 +2,7 @@ import tkinter as tk
 from . import make_barcode_list
 from . import layouts
 from . import barcodelist
+from . import applogic
 
 class MakeUpcsLayout(layouts.Layout):
     #makeupcurl should take 1 parameter: upc, and makepdffun should take a list of tuples, such that (url, quantity), and a start position such that (row, col)
@@ -26,13 +27,16 @@ class MakeUpcsLayout(layouts.Layout):
         self.loadLayout("rightPanel")
         self.generatePdfButton = tk.Button(self.rightFrame, text="Make Label PDF", command=self.makePDF)
         self.generatePdfButton.pack()
+        self.refreshFunctions.append(self.validateVars)
+        self.once = 0
 
 
     #function that actually generates a pdf to be printed
     def makePDF(self):
         upclist = []
         for row in self.upcs:
-            upclist += [row[2]] * row[1]
+            url = self.makeupcurl(row[0].get())
+            upclist += [url] * int(row[1].get())
         self.makepdffun(upclist, startingpos=(self.startingrow, self.startingcol))
 
     def setstartingpos(self, row=None, col=None):
@@ -45,61 +49,47 @@ class MakeUpcsLayout(layouts.Layout):
     def getupcs(self):
         return self.upcs
 
-    def changeupc(self, upcname:str, newupcvars:dict):
+    def changeupc(self, upcname:str, newupcvars:dict, caller=None):
         upcindex = None
-        updatedrow = []
+        isnew = False
         i = 0
         while i < len(self.upcs) and not upcindex:
             #if the upc is in the list
-            if upcname == self.upcs[i][0]:
+            if upcname == self.upcs[i][0].get():
                 upcindex = i
-                updatedrow = list(self.upcs[upcindex])
             i += 1
 
-        #if the upc is not in the list
-        if not upcindex:
-            print('hi')
+        if upcindex == None:
+            isnew = True
             upcindex = len(self.upcs)
-            quantity = 1
-            newkeys = newupcvars.keys()
-            if 'quantity' in newkeys:
-                if type(newupcvars['quantity']) == str and newupcvars['quantity'].isnumeric():
-                    quantity = int(newupcvars['quantity'])
-            lastupdated = False
-            if 'lastupdated' in newkeys:
-                bool(newupcvars['lastupdated'])
-            self.upcs.append([upcname, quantity, "", lastupdated])
-            return
+            self.upcs.append([tk.StringVar(), tk.StringVar()])
             newupcvars['upc'] = upcname
-            newupcvars['lastupdated'] = False
 
-        currentrow = self.upcs[upcindex]
-        changedfields = newupcvars.keys()
+        if "upc" in newupcvars.keys():
+            self.upcs[upcindex][0].set(newupcvars['upc'])
+            newupcvars['url'] = self.makeupcurl(newupcvars['upc'])
 
-        #if we're getting a new upc
-        if not currentrow[2]:
-            newupc = upcname
-            if 'upc' in changedfields:
-                newupc = newupcvars['upc']
-            newupcvars['url'] = self.makeupcurl(newupc)
-            changedfields = newupcvars.keys()
-
-        i = 0
-        for property in ['upc', 'quantity', 'url', 'lastupdated']:
-            if property in changedfields and self.upcs[upcindex][i] != newupcvars[property]:
-
-                print(self.upcs[upcindex][i])
-                self.upcs[upcindex][i] = newupcvars[property]
-            i += 1
-        return
-        #make sure quantity is a var
-        if type(updatedrow[1]) != int:
-            if type(updatedrow[1]) == str and updatedrow[1].isnumeric():
-                updatedrow[1] = int(updatedrow[1])
+        if 'quantity' in newupcvars.keys():
+            if newupcvars['quantity'] in ['', '0'] or not(newupcvars['quantity'].isnumeric()):
+                newupcvars['quantity'] = '1'
+            if isnew:
+                self.upcs[upcindex][1].set(newupcvars['quantity'])
             else:
-                updatedrow[1] = 1
-        print(upcindex)
-        self.upcs[upcindex] = updatedrow
+                applogic.validateQuantity(self.upcs[upcindex][1])
+                q = int(self.upcs[upcindex][1].get())
+                newquantity = q + int(newupcvars['quantity'])
+                self.upcs[upcindex][1].set("%d" % newquantity)
+
+
+        self.layouts['barcodelist'].pullRows()
+        if self.once < 3:
+            self.once += 1
+
+
+    def validateVars(self):
+        for upclist in self.upcs:
+            applogic.validateUPC(upclist[0])
+            applogic.validateQuantity(upclist[1])
 
 
 
