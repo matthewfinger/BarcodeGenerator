@@ -6,7 +6,8 @@ As it is currently, the program will only work fully on Windows, and make sure y
 
 # To use:
   1) Clone the project, and make sure you have the following dependencies installed (Sorry, venv coming soon):
-    - PIL : python image library
+    
+    - PIL (python image library)
     - requests
     - FPDF
     
