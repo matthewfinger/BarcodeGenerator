@@ -1,6 +1,7 @@
 import gui.app as gui
-import functions.barcode as bcode
-import functions.pdf as pdf
+import bin.barcode as bcode
+import bin.pdf as pdf
+from bin.DrawFunctions import make_barcode_path
 
-testapp = gui.App(bcode.getbarcode, pdf.createBarcodePDF)
+testapp = gui.App(make_barcode_path, pdf.createBarcodePDF)
 testapp.run()

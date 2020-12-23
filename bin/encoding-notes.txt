@@ -1,0 +1,63 @@
+upc (universal product code) encoding:
+7-bits, 4 'generalized bars'
+
+a generalized bar is a group of all white or all black bars such that it looks like one bar
+
+Left-Side, odd parity:
+{
+0: 0001101,
+1: 0011001,
+2: 0010011,
+3: 0111101,
+4: 0100011,
+5: 0110001,
+6: 0101111,
+7: 0111011,
+8: 0110111,
+9: 0001011,
+}
+
+-given an odd parity encoding, the even parity can be found by reversing the n-bit binary string, and inversing it such that the negatives become positive, and vice-versa
+
+-given a left side encoding, the right side can be found by inversing the n-bit binary strings, such that the negatives become positive, and vice-versa.
+
+UPC-A codes consist of 12 digits:
+  -6 left (odd parity) & 6 right digits
+
+
+
+
+
+EAN-13 (european article number) Encoding:
+
+barcodes represent a 13-digit number
+
+12 digits are independent, the 13th and last digit is a check digit determined from the former 12
+
+the first digit determines the order of parities for the following 6 digits
+
+the last 6 digits are all encoded with right -side upc encoding
+
+the parities (even->E, odd->O) for the 6 digits following the first digit are as follows:
+
+{
+0: OOOOOO,
+1: OOEOEE,
+2: OOEEOE,
+3: OOEEEO,
+4: OEOOEE,
+5: OEEOOE,
+6: OEEEOO,
+7: OEOEOE,
+8: OEOEEO,
+9: OEEOEO
+}
+
+Note that, if one were to construct a function D, that maps the digit & pariety/side to a given 7-bit binary encoding, it would be a 1:1, bijective function. Therefore, from any 7-bit encoding, it is possible to determine the pariety/side. That being said, the first digit is implicitly encoded, since it can be determined from the parieties of the following 6 digits.
+
+each ean-13 code has a start and an end marker, both denoted as 101
+
+
+
+
+*******|||

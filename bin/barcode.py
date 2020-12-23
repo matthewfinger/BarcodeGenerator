@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 def getbarcode(upc:str):
     upc = makeNumeric(upc)
     upc = upc[0:11]
-    imgpath = os.getcwd() + "\\cache\\.%s.temp.png" % upc
+    imgpath = os.path.join(os.getcwd(), "cache", "%s.temp.png" % upc)
     #we only want to use the url if we don't have the image cached already!
     while not os.path.exists(imgpath):
         url = "https://barcode.tec-it.com/barcode.ashx?data=%s&code=UPCA&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%%23000000&bgcolor=%%23ffffff&codepage=&qunit=Mm&quiet=0&dmsize=Default" % upc
